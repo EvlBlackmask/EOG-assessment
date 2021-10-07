@@ -1,25 +1,23 @@
 import React, { FC } from 'react';
 import {
-  ApolloClient,
-  ApolloProvider,
-  useQuery,
-  gql,
-  InMemoryCache,
+  ApolloClient, ApolloProvider, useQuery, gql, InMemoryCache,
 } from '@apollo/client';
 import { useGeolocation } from 'react-use';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { Typography } from '@material-ui/core';
 import Chip from '../../components/Chip';
 
-const client = new ApolloClient({
-  uri: 'https://react.eogresources.com/graphql',
-  cache: new InMemoryCache(),
-});
+const client = new ApolloClient(
+  {
+    uri: 'https://react.eogresources.com/graphql',
+    cache: new InMemoryCache(),
+  },
+);
 
 const toF = (c: number) => (c * 9) / 5 + 32;
 
 const query = gql`
-  query ($latLong: WeatherQuery!) {
+  query($latLong: WeatherQuery!) {
     getWeatherForLocation(latLong: $latLong) {
       description
       locationName
