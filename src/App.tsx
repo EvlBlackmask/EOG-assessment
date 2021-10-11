@@ -3,9 +3,16 @@ import { ToastContainer } from 'react-toastify';
 import { MuiThemeProvider, createTheme } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import 'react-toastify/dist/ReactToastify.css';
+import {
+  ApolloClient, ApolloProvider, HttpLink, InMemoryCache, split,
+} from '@apollo/client';
+import { WebSocketLink } from '@apollo/client/link/ws';
+import { getMainDefinition } from '@apollo/client/utilities';
+import { Provider } from 'react-redux';
 import Header from './components/Header';
 import Wrapper from './components/Wrapper';
-import NowWhat from './components/NowWhat';
+import MetricsLoader from './Features/vizualization/MetricsLoader';
+import store from './Redux/store';
 
 const theme = createTheme({
   palette: {
@@ -21,15 +28,47 @@ const theme = createTheme({
   },
 });
 
+const httpLink = new HttpLink({
+  uri: 'https://react.eogresources.com/graphql',
+});
+
+const wsLink = new WebSocketLink({
+  uri: 'ws://react.eogresources.com/graphql',
+  options: {
+    reconnect: true,
+  },
+});
+
+const splitLink = split(
+  ({ query }) => {
+    const definition = getMainDefinition(query);
+    return (
+      definition.kind === 'OperationDefinition'
+      && definition.operation === 'subscription'
+    );
+  },
+  wsLink,
+  httpLink,
+);
+
+const client = new ApolloClient({
+  link: splitLink,
+  cache: new InMemoryCache(),
+});
+
 const App = () => (
-  <MuiThemeProvider theme={theme}>
-    <CssBaseline />
-    <Wrapper>
-      <Header />
-      <NowWhat />
-      <ToastContainer />
-    </Wrapper>
-  </MuiThemeProvider>
+  <Provider store={store}>
+    <ApolloProvider client={client}>
+      <MuiThemeProvider theme={theme}>
+        <CssBaseline />
+        <Wrapper>
+          <Header />
+          <MetricsLoader />
+          <ToastContainer />
+        </Wrapper>
+      </MuiThemeProvider>
+    </ApolloProvider>
+  </Provider>
 );
 
 export default App;
