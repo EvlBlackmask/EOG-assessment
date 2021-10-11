@@ -8,9 +8,11 @@ import {
 } from '@apollo/client';
 import { WebSocketLink } from '@apollo/client/link/ws';
 import { getMainDefinition } from '@apollo/client/utilities';
+import { Provider } from 'react-redux';
 import Header from './components/Header';
 import Wrapper from './components/Wrapper';
-import MetricsVisualization from './Features/vizualization/MetricsVisualization';
+import MetricsLoader from './Features/vizualization/MetricsLoader';
+import store from './Redux/store';
 
 const theme = createTheme({
   palette: {
@@ -55,16 +57,18 @@ const client = new ApolloClient({
 });
 
 const App = () => (
-  <ApolloProvider client={client}>
-    <MuiThemeProvider theme={theme}>
-      <CssBaseline />
-      <Wrapper>
-        <Header />
-        <MetricsVisualization />
-        <ToastContainer />
-      </Wrapper>
-    </MuiThemeProvider>
-  </ApolloProvider>
+  <Provider store={store}>
+    <ApolloProvider client={client}>
+      <MuiThemeProvider theme={theme}>
+        <CssBaseline />
+        <Wrapper>
+          <Header />
+          <MetricsLoader />
+          <ToastContainer />
+        </Wrapper>
+      </MuiThemeProvider>
+    </ApolloProvider>
+  </Provider>
 );
 
 export default App;

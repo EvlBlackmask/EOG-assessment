@@ -1,44 +1,38 @@
 import * as React from 'react';
-import {
-  useQuery, gql,
-} from '@apollo/client';
-import { Chip, Typography } from '@material-ui/core';
 import Autocomplete, { AutocompleteRenderInputParams } from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
-import LinearProgress from '@material-ui/core/LinearProgress';
+import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
+import { setSelected } from '../../Redux/reducers/metrics';
 
 interface AutocompleteSelectorProps {
   id: string;
 }
 
-const query = gql`
-  query{
-    getMetrics
-  }
-`;
-
-type MetricTypesResponse = {
-  getMetrics: string[];
-};
-
+/**
+ * Auto complete component with multi value.
+ * @param id The id for the autocomplete
+ * @returns MUI autocomplete element
+ */
 export default function AutocompleteSelector(props: AutocompleteSelectorProps) {
   const {
     id,
   } = props;
-  const { loading, error, data } = useQuery<MetricTypesResponse>(query, {});
-  if (loading) return <LinearProgress />;
-  if (error) return <Typography color="error">{error}</Typography>;
-  if (!data) return <Chip label="Data Unavailable" />;
-
+  const dispatch = useDispatch();
+  const metricTypes = useSelector(
+    (state: RootStateOrAny) => state.metrics.metricTypes.getMetrics,
+  ) as Array<string>;
   return (
     <Autocomplete
       id={id}
-      options={data.getMetrics}
+      options={metricTypes}
       multiple
+      onChange={(event, newValue) => {
+        dispatch(setSelected(newValue));
+      }}
       getOptionLabel={(option) => option}
-      renderTags={(val: readonly string[]) => val.map((option: string) => <Chip key={option} variant="outlined" label={option} />)}
       renderInput={(params: AutocompleteRenderInputParams) => (
         <TextField
+          label='Metrics'
           InputLabelProps={params.InputLabelProps}
           InputProps={params.InputProps}
           disabled={params.disabled}
